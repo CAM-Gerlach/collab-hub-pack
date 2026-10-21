@@ -8,7 +8,7 @@ Security fixes are made on `main` and shipped in the next release. Only the most
 
 Please do not report security vulnerabilities through public GitHub issues, pull requests, or discussions.
 
-Report them privately through GitHub's private vulnerability reporting: [open a new advisory](https://github.com/nebari-dev/collab-hub-pack/security/advisories/new). Only the maintainers can see the report.
+Report them privately through GitHub's private vulnerability reporting: [open a new advisory](https://github.com/openteams-ai/collab-hub-pack/security/advisories/new). Only the maintainers can see the report.
 
 Please include as much of the following as you can:
 
@@ -34,15 +34,3 @@ Out of scope here:
 
 - Vulnerabilities in the Nebari platform itself; report those to [Nebari Infrastructure Core](https://github.com/nebari-dev/nebari-infrastructure-core/security/advisories/new) or [nebari-operator](https://github.com/nebari-dev/nebari-operator/security/advisories/new)
 - Issues that require an attacker to already hold cluster-admin or cloud-account administrator credentials
-
-## Verifying Releases
-
-This repository's Helm chart is published to `quay.io/nebari/charts/collab-hub` and signed with [Sigstore cosign](https://docs.sigstore.dev/) using keyless signing from the [helm-repository](https://github.com/nebari-dev/helm-repository) release workflow. To verify a version (replace `<version>`):
-
-```bash
-cosign verify quay.io/nebari/charts/collab-hub:<version> \
-  --certificate-identity-regexp 'https://github\.com/nebari-dev/helm-repository/\.github/workflows/release-helm-charts\.yml@.*' \
-  --certificate-oidc-issuer https://token.actions.githubusercontent.com
-```
-
-See [Verifying Nebari artifacts](https://github.com/nebari-dev/.github/blob/main/verifying-nebari-artifacts.md) for build-provenance attestations and other artifact types.

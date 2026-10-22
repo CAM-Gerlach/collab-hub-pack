@@ -19,5 +19,6 @@ hermes-agent = { version = "==0.19.0", extras = ["acp", "anthropic"] }
 [pypi-options]
 # hermes-agent 0.19.0 pins certifi==2026.5.20, which still trusts the compromised
 # eMudhra intermediates. Override until a hermes-agent release lifts the pin
-# (its main already carries certifi==2026.10.19), then drop this.
+# (its main already carries certifi==2026.10.19), then drop this override only:
+# the worker's own trust-store default (serve.py, README) stays.
 dependency-overrides = { certifi = ">=2026.10.19" }

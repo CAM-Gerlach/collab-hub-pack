@@ -44,6 +44,13 @@ The Cog packages ([`cogs/`](cogs/), [`dev/cogs/`](dev/cogs/) and the
 releases trust the same compromised CA chain. Update via `pixi self-update` or
 the package manager you installed it with.
 
+The tool versions CI installs each live in one file, so a bump is a one-line
+change: uv in [`.github/uv.toml`](.github/uv.toml), pixi in
+[`.github/pixi-version`](.github/pixi-version), and Node in the `.node-version`
+beside each package that needs it ([`api/admin-ui/`](api/admin-ui/) and
+[`scripts/release/semantic-release/`](scripts/release/semantic-release/)).
+Dependabot bumps action and image versions, not these.
+
 The admin panel is a Vite and React app in [`api/admin-ui/`](api/admin-ui/)
 with its own Vitest suite. It needs Node 24.22.1 or later (CI pins 24.22.1):
 

@@ -46,13 +46,21 @@ COG = os.environ.get("COLLAB_COG_ID", "hermes")
 DEFAULT_CLAUDE = "claude-opus-5-5"
 # What Hermes's process inherits from the worker's: enough to run, and no credential.
 HERMES_INHERITS = ("PATH", "LANG", "LC_ALL", "TZ", "TMPDIR", "SSL_CERT_FILE", "SSL_CERT_DIR", "REQUESTS_CA_BUNDLE")
-# The package's own CA bundle: conda-forge's ca-certificates, pinned by pixi.lock and current, where
-# certifi's can lag behind a dependency's pin (hermes-agent 0.19.0 pins a certifi that still trusts the
-# compromised eMudhra intermediates). Hermes's clients read these variables ahead of certifi's bundle:
-# httpx and the Anthropic SDK honour SSL_CERT_FILE, requests honours REQUESTS_CA_BUNDLE. Only inside
-# the package's pixi environment (pixi sets PIXI_ENVIRONMENT_NAME on activation): in the `host`
-# environment sys.prefix is whatever interpreter runs this, whose bundle may be older than certifi's.
+# The CA bundle Hermes verifies TLS against inside the package's pixi environment: conda-forge's
+# ca-certificates, the same Mozilla bundle certifi ships (the feedstock builds it from certifi's own
+# cacert.pem), through a package pixi.lock controls and `pixi update ca-certificates` bumps. certifi
+# itself is pinned exactly by hermes-agent, so a root-store fix there waits on a hermes-agent release.
+# Hermes reads these variables ahead of certifi's bundle: SSL_CERT_FILE for httpx and the Anthropic
+# SDK, REQUESTS_CA_BUNDLE for requests. Only inside the pixi environment (pixi sets
+# PIXI_ENVIRONMENT_NAME on activation): in the `host` environment sys.prefix is whatever interpreter
+# runs this, whose bundle may be older than certifi's. This stays: the certifi override in pixi.toml
+# is the incident-only part.
 CA_BUNDLE = Path(sys.prefix) / "ssl" / "cacert.pem"
+RUN = os.environ.get("COLLAB_RUN_ID", "")
+TOKEN = os.environ.get("COLLAB_RUN_TOKEN", "")
+# Overridable so the worker can be tested against a stand-in agent; Hermes itself by default.
+AGENT = shlex.split(os.environ.get("COLLAB_HERMES_COMMAND", "")) or [
+    sys.executable, str(Path(__file__).resolve().parent / "hermes_acp.py")]
 
 
 def own_ca_bundle():
@@ -75,11 +83,6 @@ def hermes_environment():
     if bundle and not any(env.get(name) for name in ("SSL_CERT_FILE", "SSL_CERT_DIR", "REQUESTS_CA_BUNDLE")):
         env["SSL_CERT_FILE"] = env["REQUESTS_CA_BUNDLE"] = bundle
     return env
-RUN = os.environ.get("COLLAB_RUN_ID", "")
-TOKEN = os.environ.get("COLLAB_RUN_TOKEN", "")
-# Overridable so the worker can be tested against a stand-in agent; Hermes itself by default.
-AGENT = shlex.split(os.environ.get("COLLAB_HERMES_COMMAND", "")) or [
-    sys.executable, str(Path(__file__).resolve().parent / "hermes_acp.py")]
 
 
 def log(message):

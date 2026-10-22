@@ -76,7 +76,7 @@ jobs:
           # A one-line edit rather than a YAML round-trip, so the rest of the
           # file ships exactly as written; the parse afterwards proves it hit
           # api.deployment.image.tag and nothing else.
-          python3 -m pip install --quiet pyyaml
+          python3 -m pip install --quiet --upgrade "pip>=26.2.2" && python3 -m pip install --quiet pyyaml
           python3 - "${CHART_PATH}/values.yaml" "sha-${GITHUB_SHA::7}" <<'EOF'
           import re, sys, yaml
           path, tag = sys.argv[1:]

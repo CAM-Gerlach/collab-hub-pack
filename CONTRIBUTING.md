@@ -22,7 +22,10 @@ setup each connector needs. CI exercises all four —
 [`.github/workflows/dev-env.yaml`](.github/workflows/dev-env.yaml).
 
 The API itself lives in [`api/`](api/) and uses
-[uv](https://docs.astral.sh/uv/), if you would rather drive it directly:
+[uv](https://docs.astral.sh/uv/), if you would rather drive it directly. Use
+uv 0.13.4 or later: earlier releases still trust the compromised eMudhra CA
+chain, so upgrade with `uv self update` (standalone installer) or your package
+manager before running anything that reaches the network:
 
 ```sh
 cd api
@@ -36,7 +39,7 @@ table). CI's `test` job starts a Postgres service and sets it, so those tests
 run there.
 
 The admin panel is a Vite and React app in [`api/admin-ui/`](api/admin-ui/)
-with its own Vitest suite. It needs Node (CI uses Node 24):
+with its own Vitest suite. It needs Node 24.22.1 or later (CI pins 24.22.1):
 
 ```sh
 cd api/admin-ui

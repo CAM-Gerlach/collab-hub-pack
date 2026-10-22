@@ -45,7 +45,12 @@ from pathlib import Path
 COG = os.environ.get("COLLAB_COG_ID", "hermes")
 DEFAULT_CLAUDE = "claude-opus-5-5"
 # What Hermes's process inherits from the worker's: enough to run, and no credential.
-HERMES_INHERITS = ("PATH", "LANG", "LC_ALL", "TZ", "TMPDIR", "SSL_CERT_FILE", "SSL_CERT_DIR")
+HERMES_INHERITS = ("PATH", "LANG", "LC_ALL", "TZ", "TMPDIR", "SSL_CERT_FILE", "SSL_CERT_DIR", "REQUESTS_CA_BUNDLE")
+# The package's own CA bundle: conda-forge's ca-certificates, pinned by pixi.lock and current, where
+# certifi's can lag behind a dependency's pin (hermes-agent 0.19.0 pins a certifi that still trusts the
+# compromised eMudhra intermediates). Hermes's clients read these variables ahead of certifi's bundle:
+# httpx and the Anthropic SDK honour SSL_CERT_FILE, requests honours REQUESTS_CA_BUNDLE.
+CA_BUNDLE = Path(sys.prefix) / "ssl" / "cacert.pem"
 RUN = os.environ.get("COLLAB_RUN_ID", "")
 TOKEN = os.environ.get("COLLAB_RUN_TOKEN", "")
 # Overridable so the worker can be tested against a stand-in agent; Hermes itself by default.
@@ -106,6 +111,9 @@ class Agent:
         # under HOME (Claude Code's among them): it gets neither, only what it needs to run, a HOME
         # of its own, and its config, which names the model it was delivered.
         env = {name: os.environ[name] for name in HERMES_INHERITS if name in os.environ}
+        if CA_BUNDLE.is_file():  # the controller's own bundles, when it delivered any, win
+            env.setdefault("SSL_CERT_FILE", str(CA_BUNDLE))
+            env.setdefault("REQUESTS_CA_BUNDLE", str(CA_BUNDLE))
         env.update(HERMES_HOME=str(hermes_home(self.workspace)), HOME=str(self.workspace))
         if os.environ.get("COLLAB_MODEL_PROVIDER") == "anthropic":
             env["ANTHROPIC_API_KEY"] = os.environ["COLLAB_MODEL_API_KEY"]

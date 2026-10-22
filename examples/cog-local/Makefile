@@ -69,7 +69,7 @@ env: ## Install what the example uses: the CLI, the hub, Toad, pixi, and Hermes'
 	cd $(ROOT)/api && uv sync --quiet --group runs
 	cd $(ROOT)/execution && uv sync --quiet
 	uv tool install --quiet -U batrachian-toad --python 3.14
-	@command -v pixi >/dev/null || { echo "installing pixi (https://pixi.sh)"; curl -fsSL https://pixi.sh/install.sh | bash; }
+	@command -v pixi >/dev/null || { echo "installing pixi (https://pixi.sh)"; curl -fsSL https://pixi.sh/install.sh | PIXI_VERSION=v0.82.1 bash; }
 	PATH="$$HOME/.pixi/bin:$$PATH" pixi install --manifest-path $(ROOT)/cogs/hermes/pixi.toml
 	PATH="$$HOME/.pixi/bin:$$PATH" pixi install --manifest-path $(CURDIR)/cogs/hello/pixi.toml
 	@echo "Ready. If pixi or toad was just installed, open a new shell, or add ~/.pixi/bin and ~/.local/bin to PATH."

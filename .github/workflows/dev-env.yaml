@@ -57,6 +57,7 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
+          version: "0.13.4"
           enable-cache: true
           cache-dependency-glob: api/uv.lock
 
@@ -157,6 +158,7 @@ jobs:
       - name: Install pixi
         uses: prefix-dev/setup-pixi@v0.10.2
         with:
+          pixi-version: v0.82.1
           run-install: false
 
       - name: make op LOCATION=local runs a fake Cog as a process, and a killed host leaves no worker
@@ -205,6 +207,7 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
+          version: "0.13.4"
           enable-cache: true
           cache-dependency-glob: api/uv.lock
 

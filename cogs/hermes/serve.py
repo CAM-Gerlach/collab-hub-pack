@@ -49,8 +49,32 @@ HERMES_INHERITS = ("PATH", "LANG", "LC_ALL", "TZ", "TMPDIR", "SSL_CERT_FILE", "S
 # The package's own CA bundle: conda-forge's ca-certificates, pinned by pixi.lock and current, where
 # certifi's can lag behind a dependency's pin (hermes-agent 0.19.0 pins a certifi that still trusts the
 # compromised eMudhra intermediates). Hermes's clients read these variables ahead of certifi's bundle:
-# httpx and the Anthropic SDK honour SSL_CERT_FILE, requests honours REQUESTS_CA_BUNDLE.
+# httpx and the Anthropic SDK honour SSL_CERT_FILE, requests honours REQUESTS_CA_BUNDLE. Only inside
+# the package's pixi environment (pixi sets PIXI_ENVIRONMENT_NAME on activation): in the `host`
+# environment sys.prefix is whatever interpreter runs this, whose bundle may be older than certifi's.
 CA_BUNDLE = Path(sys.prefix) / "ssl" / "cacert.pem"
+
+
+def own_ca_bundle():
+    """The pixi environment's CA bundle, or None outside one or when the environment has no bundle."""
+    if os.environ.get("PIXI_ENVIRONMENT_NAME") and CA_BUNDLE.is_file():
+        return str(CA_BUNDLE)
+    return None
+
+
+def hermes_environment():
+    """What Hermes's process gets from the worker's environment: the inherited names, and the CA bundles.
+
+    The controller's own bundles, when it delivered any, win, and any one delivered disables the
+    defaults rather than being merged with them: Hermes resolves SSL_CERT_FILE or REQUESTS_CA_BUNDLE
+    itself and otherwise lets httpx read SSL_CERT_FILE, then SSL_CERT_DIR, so a default set beside a
+    delivered variable would take precedence over it (a default file over a delivered directory, say).
+    """
+    env = {name: os.environ[name] for name in HERMES_INHERITS if name in os.environ}
+    bundle = own_ca_bundle()
+    if bundle and not any(env.get(name) for name in ("SSL_CERT_FILE", "SSL_CERT_DIR", "REQUESTS_CA_BUNDLE")):
+        env["SSL_CERT_FILE"] = env["REQUESTS_CA_BUNDLE"] = bundle
+    return env
 RUN = os.environ.get("COLLAB_RUN_ID", "")
 TOKEN = os.environ.get("COLLAB_RUN_TOKEN", "")
 # Overridable so the worker can be tested against a stand-in agent; Hermes itself by default.
@@ -110,10 +134,7 @@ class Agent:
         # Hermes picks up any provider's key it finds in its environment, and credentials of its own
         # under HOME (Claude Code's among them): it gets neither, only what it needs to run, a HOME
         # of its own, and its config, which names the model it was delivered.
-        env = {name: os.environ[name] for name in HERMES_INHERITS if name in os.environ}
-        if CA_BUNDLE.is_file():  # the controller's own bundles, when it delivered any, win
-            env.setdefault("SSL_CERT_FILE", str(CA_BUNDLE))
-            env.setdefault("REQUESTS_CA_BUNDLE", str(CA_BUNDLE))
+        env = hermes_environment()
         env.update(HERMES_HOME=str(hermes_home(self.workspace)), HOME=str(self.workspace))
         if os.environ.get("COLLAB_MODEL_PROVIDER") == "anthropic":
             env["ANTHROPIC_API_KEY"] = os.environ["COLLAB_MODEL_API_KEY"]

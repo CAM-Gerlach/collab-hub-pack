@@ -38,6 +38,12 @@ points at a throwaway database (they drop and recreate every `collab_`
 table). CI's `test` job starts a Postgres service and sets it, so those tests
 run there.
 
+The Cog packages ([`cogs/`](cogs/), [`dev/cogs/`](dev/cogs/) and the
+[`examples/`](examples/)) are [pixi](https://pixi.sh/) projects and need pixi
+0.82.1 or later, which their manifests state with `requires-pixi`; earlier
+releases trust the same compromised CA chain. Update via `pixi self-update` or
+the package manager you installed it with.
+
 The admin panel is a Vite and React app in [`api/admin-ui/`](api/admin-ui/)
 with its own Vitest suite. It needs Node 24.22.1 or later (CI pins 24.22.1):
 

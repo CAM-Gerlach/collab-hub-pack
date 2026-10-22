@@ -62,6 +62,10 @@ jobs:
           # so no Dockerfile change is needed for a GHCR-only custom build.
           build-contexts: |
             projectroot=.
+          # Always re-resolve the base images, so a rebuild picks up a base
+          # image republished under the same tag (a ca-certificates fix, say)
+          # rather than a stale local layer.
+          pull: true
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
 

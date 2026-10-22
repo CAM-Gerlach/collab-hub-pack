@@ -20,14 +20,15 @@ Please include as much of the following as possible:
 
 The maintainers will acknowledge the report within 7 days, work with you to confirm and understand the issue, and keep you updated on progress toward a fix. Once a fix is released, we will publish a GitHub Security Advisory and credit you unless you ask us not to.
 
-Please give us a reasonable time--at least 45 days--to release a fix before disclosing the issue publicly.
+Please give us a reasonable time (at least 45 days) to release a fix before disclosing the issue publicly.
 
 ## Scope
 
 In scope:
 
-- The pack's Helm chart and its default values
-- Code in this repository, including any services, operators, or UIs it builds
+- The pack's Helm chart and its default values, and the chart and container images we publish to GHCR
+- Code in this repository, including the API service, admin UI, and `collab-hub` CLI
+- Cog execution, including isolation between a running cog and the hub, other cogs, user credentials, and the network
 - How the pack integrates with Nebari, such as NebariApp routing, TLS, and Keycloak authentication
 - How the Collab desktop applications or other clients interact with the pack
 
@@ -35,3 +36,4 @@ Out of scope here:
 
 - Vulnerabilities in the Nebari platform itself; report those to [Nebari Infrastructure Core](https://github.com/nebari-dev/nebari-infrastructure-core/security/advisories/new) or [nebari-operator](https://github.com/nebari-dev/nebari-operator/security/advisories/new)
 - Issues that require an attacker to already hold cluster-admin or cloud-account administrator credentials, or have control over the underlying hardware
+- Vulnerabilities in upstream components the chart deploys, such as Keycloak or PostgreSQL; report those to the upstream project. How this pack configures them remains in scope

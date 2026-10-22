@@ -4,12 +4,12 @@
 # Build context is the repo root.
 FROM python:3.13.17-slim
 WORKDIR /app
-# The 3.13.17 pin is what guarantees a clean bootstrap pip: its ensurepip
-# ships pip 26.2.2, whose vendored certifi (2026.10.19) excludes the
-# compromised eMudhra roots. The pip floor below keeps a later rebase from
-# regressing that, and the certifi floor does the same for httpx's bundle.
-RUN python -m pip install --no-cache-dir --upgrade "pip>=26.2.2" \
- && python -m pip install --no-cache-dir "httpx>=0.28.0" "certifi>=2026.10.19"
+# pip verifies PyPI against the image's Debian trust store (its truststore
+# feature, default since pip 24.2), which is fixed only when Debian ships its
+# ca-certificates update; a pip version changes none of that. The certifi floor
+# is for httpx, which reads certifi's bundle: 2026.10.19 is the first without
+# the compromised eMudhra roots.
+RUN python -m pip install --no-cache-dir "httpx>=0.28.0" "certifi>=2026.10.19"
 # The real package under test.
 COPY execution/src/collab_hub_execution /app/collab_hub_execution
 COPY scripts/cog-execution-e2e/runner.py scripts/cog-execution-e2e/driver.py /app/e2e/

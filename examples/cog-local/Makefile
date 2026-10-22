@@ -79,8 +79,12 @@ env: ## Install what the example uses: the CLI, the hub, Toad, pixi, and Hermes'
 	@echo "Ready. If pixi or toad was just installed, or pixi replaced, open a new shell, or put ~/.pixi/bin and ~/.local/bin first on PATH."
 
 tools: ## Check what the example needs: docker, uv, pixi, and toad for `make connect` and `make toad`
-	@for tool in docker uv pixi; do command -v $$tool >/dev/null \
+	@for tool in docker uv; do command -v $$tool >/dev/null \
 		&& echo "  ok      $$tool" || { echo "  missing $$tool"; missing=1; }; done; \
+	if ! command -v pixi >/dev/null; then echo "  missing pixi"; missing=1; \
+	elif [ "$$(printf '%s\n' 0.82.1 "$$(pixi --version | cut -d' ' -f2)" | sort -V | head -n1)" = 0.82.1 ]; then echo "  ok      pixi"; \
+	else echo "  too old pixi $$(pixi --version | cut -d' ' -f2) at $$(command -v pixi): the Cogs need 0.82.1 or later, and the" \
+	     "controller runs the first pixi on PATH (make env installs one to ~/.pixi/bin; put it first)"; missing=1; fi; \
 	command -v toad >/dev/null && echo "  ok      toad" || echo "  missing toad (only for make connect and make toad): make env"; \
 	test -d $(ROOT)/cogs/hermes/.pixi/envs/default && echo "  ok      Hermes's environment" \
 		|| echo "  missing Hermes's environment (the first launch installs it, slowly): make env"; \

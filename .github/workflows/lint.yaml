@@ -123,7 +123,7 @@ jobs:
         run: helm template helm/collab-hub -f helm/collab-hub/ci/cogs-values.yaml | kubeconform -strict -ignore-missing-schemas -
 
       - name: Install PyYAML for the render assertions
-        run: python3 -m pip install --quiet --upgrade "pip>=26.2.2" && python3 -m pip install --quiet pyyaml
+        run: python3 -m pip install --quiet pyyaml
 
       - name: Chart render tests
         # Positive renders with assertions on the output, plus every refused
